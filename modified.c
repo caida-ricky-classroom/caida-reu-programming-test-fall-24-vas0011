@@ -2,16 +2,15 @@
 #include <stdio.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
-#include <net/ethernet.h>
+#include <net/ethernet.h>       //need to change for mac os
 
 int main(int argc, char *argv[]) {
     char errbuf[PCAP_ERRBUF_SIZE];
     pcap_t *handle;
     const unsigned char *packet;
     struct pcap_pkthdr header;
-    struct ip *ip_header;
+    struct ip *ip_header;   //iphdr was not recognized by mac os
     int packet_count = 0;
-    int last_octet_count[256]; //octet values range from 0 to 255 so we need this array to keep track of occurences
 
     if (argc != 2) {
         fprintf(stderr, "Usage: %s <pcap file>\n", argv[0]);
@@ -25,18 +24,13 @@ int main(int argc, char *argv[]) {
     }
 
     while ((packet = pcap_next(handle, &header)) != NULL) {
-        ip_header = (struct ip*)(packet + sizeof(struct ether_header));
-        uint32_t dst_ip = ntohl(ip_header->ip_dst.s_addr); // Convert the destination IP to host byte order
-        int last_octet = dst_ip & 0xFF; // Get the last octet from the destination IP
-        last_octet_count[last_octet]++; // Increment the count for the current last octet
+        ip_header = (struct ip*)(packet + sizeof(struct ether_header)); 
+        //changed to ether_header because ethhdr was not recognized by mac os
+        printf("Packet %d: IP destination address: %s\n", ++packet_count, inet_ntoa(ip_header->ip_dst));
+        // Changed bdcause there is no memeber named 'daddr' in 'struct ip'
+        //Also we want to get the destination ip which you can get by doing ip_header->ip_dst
     }
 
     pcap_close(handle);
-    for (int i = 0; i < 256; i++) {
-        if (last_octet_count[i] > 0) {
-            printf("Last octet %d: %d \n", i, last_octet_count[i]); //print the number of occurences for each octet
-        }
-    }
-
     return 0;
 }
