@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
         //changed to ether_header because ethhdr was not recognized by mac os
         printf("Packet %d: IP destination address: %s\n", ++packet_count, inet_ntoa(ip_header->ip_dst));
         // Changed bdcause there is no memeber named 'daddr' in 'struct ip'
-        //Also we want to get the destination ip whcih is you can get by doing ip_header->ip_dst
+        //Also we want to get the destination ip which you can get by doing ip_header->ip_dst
     }
 
     pcap_close(handle);
